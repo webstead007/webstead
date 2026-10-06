@@ -1,0 +1,8 @@
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight } from 'lucide-react'
+import { ProjectCard, ProjectModal, PageHero, SEO, FinalCTA } from '../components/Site'
+import { projects } from '../data/projects'
+
+const filters=['All','Web Development','E-Commerce']
+export default function Portfolio(){const[active,setActive]=useState('All');const[project,setProject]=useState(null);const visible=useMemo(()=>active==='All'?projects:projects.filter(p=>p.filter===active),[active]);return <><SEO title="Our Work | Webstead" description="See selected live website and e-commerce projects built by Webstead."/><PageHero eyebrow="RECENT PROJECTS" title={<>Websites we’ve<br/>built for <em>businesses.</em></>} description="From a honey brand to a football store: explore the design, movement and details in our live projects."/><section className="portfolio-section section-pad"><div className="wrap"><div className="filter-row" role="group" aria-label="Filter projects">{filters.map(f=><button key={f} aria-pressed={active===f} className={active===f?'active':''} onClick={()=>setActive(f)}>{f}<span>{f==='All'?projects.length:projects.filter(p=>p.filter===f).length}</span></button>)}</div><div className="project-grid portfolio-grid">{visible.map((p,i)=><ProjectCard key={p.id} project={p} index={i} onOpen={setProject}/>)}</div><div className="portfolio-contact-link"><span>Want a website like these?</span><Link to="/contact">Get a quote for my website <ArrowUpRight size={15}/></Link></div></div></section><FinalCTA/><ProjectModal project={project} onClose={()=>setProject(null)}/></>}
