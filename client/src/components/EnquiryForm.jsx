@@ -7,6 +7,7 @@ import { packages } from '../data/packages'
 import { projects } from '../data/projects'
 
 export default function EnquiryForm(){
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
   const [params]=useSearchParams()
   const selectedPackage=packages.find(p=>p.id===params.get('package'))
   const selectedService=services.find(s=>s.id===params.get('service'))
@@ -26,7 +27,7 @@ export default function EnquiryForm(){
     const controller=new AbortController()
     const timeout=window.setTimeout(()=>controller.abort(),35000)
     try {
-      const response=await fetch(`${import.meta.env.VITE_API_URL||''}/api/contact`, {
+      const response=await fetch(`${apiBase}/api/contact`, {
         method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form), signal:controller.signal,
       })
       const data=response.headers.get('content-type')?.includes('application/json')?await response.json():null
