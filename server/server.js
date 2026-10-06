@@ -16,6 +16,7 @@ const allowedOrigins = [
 ].map(origin => origin.trim().replace(/\/+$/, '')).filter(Boolean)
 
 app.disable('x-powered-by')
+if (process.env.RENDER === 'true') app.set('trust proxy', 1)
 app.use(helmet())
 app.use(cors({ origin: [...new Set(allowedOrigins)], methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }))
 app.use(express.json({ limit: '20kb' }))
