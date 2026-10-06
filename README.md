@@ -5,7 +5,7 @@ A responsive five-page agency site with a React/Vite frontend and an Express API
 ## Requirements
 
 - Node.js 20 or later
-- SMTP credentials for direct contact-form email delivery
+- SMTP credentials or a Web3Forms access key for contact-form email delivery
 
 ## Architecture
 
@@ -23,7 +23,7 @@ A responsive five-page agency site with a React/Vite frontend and an Express API
    npm install --prefix server
    ```
 
-2. Copy `server/.env.example` to `server/.env` and configure `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`, and `CONTACT_RECEIVER`. The default recipient is `webstead.in@gmail.com`. For a Gmail sender, use its app password. Credentials stay on the server; never use a `VITE_` prefix for credentials. Without SMTP credentials, submission returns an error and preserves the form details.
+2. Copy `server/.env.example` to `server/.env` and configure either `WEB3FORMS_ACCESS_KEY` or the SMTP settings (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, and `EMAIL_PASSWORD`). Create the Web3Forms key for `webstead.in@gmail.com` so enquiries go to that inbox. An access key takes priority when both delivery methods are configured. Credentials stay on the server; never use a `VITE_` prefix for them. Without a delivery method, submission returns an error and preserves the form details.
 
 3. Start both apps:
 
@@ -44,9 +44,9 @@ The production frontend bundle is written to `client/dist`. Start the API with `
 ## API
 
 - `GET /api/health` — health check
-- `POST /api/contact` — validates and emails an enquiry to the configured recipient; returns `sent: true` only after SMTP acceptance
+- `POST /api/contact` — validates an enquiry and forwards it to the configured email service; returns `sent: true` only after the service accepts it
 
-The contact API is rate limited. Required request fields are `name`, `email`, `service`, `message` and `privacy: true`. The form has no delivery-method selection or email-app handoff. No enquiry is stored in a database. SMTP acceptance confirms handoff to the mail provider, not inbox placement.
+The contact API is rate limited. Required request fields are `name`, `email`, `service`, `message` and `privacy: true`. The form has no delivery-method selection or email-app handoff. No enquiry is stored in a database. Provider acceptance confirms handoff, not inbox placement.
 
 ## Deployment
 
@@ -61,7 +61,7 @@ The contact API is rate limited. Required request fields are `name`, `email`, `s
 
 - Set the service root to `server` (or use the repository root with `npm start --prefix server`).
 - Build/install command: `npm install`; start command: `npm start`.
-- Configure `CLIENT_ORIGIN`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`, and `CONTACT_RECEIVER` as provider environment variables. Set `PORT` only if the platform does not inject it.
+- Configure `CLIENT_ORIGIN` and one email delivery method as provider environment variables. Render Free blocks outbound SMTP ports `25`, `465`, and `587`, so set `WEB3FORMS_ACCESS_KEY` there instead of relying on Gmail SMTP. Create that key for the inbox that should receive enquiries. Set `PORT` only if the platform does not inject it.
 
 ## Content notes
 
