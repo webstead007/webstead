@@ -9,10 +9,15 @@ import contactRoutes from './routes/contactRoutes.js'
 dotenv.config({ path: fileURLToPath(new URL('./.env', import.meta.url)) })
 const app = express()
 const port = Number(process.env.PORT || 5000)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://webstead.vercel.app',
+  ...(process.env.CLIENT_ORIGIN || '').split(','),
+].map(origin => origin.trim().replace(/\/+$/, '')).filter(Boolean)
 
 app.disable('x-powered-by')
 app.use(helmet())
-app.use(cors({ origin: process.env.CLIENT_ORIGIN ? process.env.CLIENT_ORIGIN.split(',').map(value => value.trim()) : ['http://localhost:5173'], methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }))
+app.use(cors({ origin: [...new Set(allowedOrigins)], methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }))
 app.use(express.json({ limit: '20kb' }))
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 app.use('/api/contact', rateLimit({ windowMs: 15 * 60 * 1000, limit: 8, standardHeaders: 'draft-7', legacyHeaders: false, message: { message: 'Too many enquiries from this network. Please try again later.' } }))
