@@ -8,6 +8,7 @@ import { projects } from '../data/projects'
 
 export default function EnquiryForm(){
   const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+  const web3FormsKey = (import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || '').trim()
   const [params]=useSearchParams()
   const selectedPackage=packages.find(p=>p.id===params.get('package'))
   const selectedService=services.find(s=>s.id===params.get('service'))
@@ -27,11 +28,17 @@ export default function EnquiryForm(){
     const controller=new AbortController()
     const timeout=window.setTimeout(()=>controller.abort(),35000)
     try {
-      const response=await fetch(`${apiBase}/api/contact`, {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form), signal:controller.signal,
+      const response=await fetch(web3FormsKey?'https://api.web3forms.com/submit':`${apiBase}/api/contact`, {
+        method:'POST', headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify(web3FormsKey?{
+          access_key:web3FormsKey,
+          subject:`New Webstead enquiry: ${form.service}`,
+          name:form.name,email:form.email,phone:form.phone||'Not provided',
+          service:form.service,budget:form.budget||'Please advise',message:form.message,
+        }:form), signal:controller.signal,
       })
       const data=response.headers.get('content-type')?.includes('application/json')?await response.json():null
-      if(!response.ok||data?.sent!==true) throw new Error('send-failed')
+      if(!response.ok||(web3FormsKey?data?.success!==true:data?.sent!==true)) throw new Error('send-failed')
       setStatus('success')
       setNotice({type:'success',title:'Enquiry sent successfully!',message:'Thank you for contacting Webstead. We’ll get back to you soon.'})
     } catch (error) {

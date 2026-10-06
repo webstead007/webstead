@@ -13,30 +13,6 @@ export async function createContact(req, res) {
   }
   // The visitor cannot override the server's destination or sender.
   const recipient = process.env.CONTACT_RECEIVER || 'webstead.in@gmail.com'
-  if (process.env.WEB3FORMS_ACCESS_KEY) {
-    try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_key: process.env.WEB3FORMS_ACCESS_KEY,
-          subject: `New Webstead enquiry: ${service}`,
-          name, email, phone: phone || 'Not provided', service,
-          budget: budget || 'Please advise', message,
-        }),
-        signal: AbortSignal.timeout(15000),
-      })
-      const result = await response.json().catch(() => null)
-      if (!response.ok || result?.success !== true) {
-        console.error('Contact form provider rejected enquiry:', response.status)
-        return res.status(502).json({ sent: false, message: 'We could not send your enquiry. Please try again shortly.' })
-      }
-      return res.status(200).json({ sent: true, message: 'Your enquiry has been sent to Webstead.' })
-    } catch (error) {
-      console.error('Contact form provider failed:', error.name === 'TimeoutError' ? 'ETIMEDOUT' : 'REQUEST_FAILED')
-      return res.status(502).json({ sent: false, message: 'We could not send your enquiry. Please try again shortly.' })
-    }
-  }
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
     console.warn('Contact email unavailable: SMTP configuration is incomplete.')
     return res.status(503).json({ sent: false, message: 'Enquiries are temporarily unavailable. Please try again shortly.' })
